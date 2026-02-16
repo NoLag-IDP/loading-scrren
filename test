@@ -1,0 +1,731 @@
+--// 🌊 Escape Tsunami Dupe
+if game.CoreGui:FindFirstChild("ETFB_DupeGUI") then
+	game.CoreGui.ETFB_DupeGUI:Destroy()
+end
+
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+
+--------------------------------------------------------
+-- LOADING SCREEN (40 seconds)
+--------------------------------------------------------
+local LoadingGui = Instance.new("ScreenGui")
+LoadingGui.Name = "LoadingScreen"
+LoadingGui.IgnoreGuiInset = false
+LoadingGui.ResetOnSpawn = false
+LoadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+LoadingGui.Parent = CoreGui
+
+-- Loading Frame
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Size = UDim2.new(0, 300, 0, 150)
+LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+LoadingFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+LoadingFrame.BorderSizePixel = 0
+LoadingFrame.ZIndex = 200
+LoadingFrame.Parent = LoadingGui
+
+local LoadingCorner = Instance.new("UICorner")
+LoadingCorner.CornerRadius = UDim.new(0, 10)
+LoadingCorner.Parent = LoadingFrame
+
+local LoadingStroke = Instance.new("UIStroke")
+LoadingStroke.Thickness = 2
+LoadingStroke.Color = Color3.fromRGB(60, 60, 70)
+LoadingStroke.Parent = LoadingFrame
+
+-- Title
+local LoadingTitle = Instance.new("TextLabel")
+LoadingTitle.Size = UDim2.new(1, -40, 0, 40)
+LoadingTitle.Position = UDim2.new(0, 20, 0, 15)
+LoadingTitle.BackgroundTransparency = 1
+LoadingTitle.Text = "ESCAPE TSUNAMI DUPE"
+LoadingTitle.Font = Enum.Font.GothamBold
+LoadingTitle.TextSize = 16
+LoadingTitle.TextColor3 = Color3.fromRGB(220, 220, 230)
+LoadingTitle.TextXAlignment = Enum.TextXAlignment.Center
+LoadingTitle.ZIndex = 201
+LoadingTitle.Parent = LoadingFrame
+
+-- Loading Text
+local LoadingText = Instance.new("TextLabel")
+LoadingText.Size = UDim2.new(1, -40, 0, 20)
+LoadingText.Position = UDim2.new(0, 20, 0, 55)
+LoadingText.BackgroundTransparency = 1
+LoadingText.Text = "Loading..."
+LoadingText.Font = Enum.Font.Gotham
+LoadingText.TextSize = 13
+LoadingText.TextColor3 = Color3.fromRGB(170, 170, 180)
+LoadingText.TextXAlignment = Enum.TextXAlignment.Center
+LoadingText.ZIndex = 201
+LoadingText.Parent = LoadingFrame
+
+-- Progress Bar Background
+local ProgressBg = Instance.new("Frame")
+ProgressBg.Size = UDim2.new(0.85, 0, 0, 8)
+ProgressBg.Position = UDim2.new(0.075, 0, 0, 90)
+ProgressBg.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+ProgressBg.BorderSizePixel = 0
+ProgressBg.ZIndex = 201
+ProgressBg.Parent = LoadingFrame
+
+local ProgressBgCorner = Instance.new("UICorner")
+ProgressBgCorner.CornerRadius = UDim.new(1, 0)
+ProgressBgCorner.Parent = ProgressBg
+
+-- Progress Bar Fill
+local ProgressFill = Instance.new("Frame")
+ProgressFill.Size = UDim2.new(0, 0, 1, 0)
+ProgressFill.Position = UDim2.new(0, 0, 0, 0)
+ProgressFill.BackgroundColor3 = Color3.fromRGB(80, 200, 80)
+ProgressFill.BorderSizePixel = 0
+ProgressFill.ZIndex = 202
+ProgressFill.Parent = ProgressBg
+
+local ProgressFillCorner = Instance.new("UICorner")
+ProgressFillCorner.CornerRadius = UDim.new(1, 0)
+ProgressFillCorner.Parent = ProgressFill
+
+-- Percentage Text
+local PercentText = Instance.new("TextLabel")
+PercentText.Size = UDim2.new(1, -40, 0, 20)
+PercentText.Position = UDim2.new(0, 20, 0, 110)
+PercentText.BackgroundTransparency = 1
+PercentText.Text = "0%"
+PercentText.Font = Enum.Font.GothamBold
+PercentText.TextSize = 14
+PercentText.TextColor3 = Color3.fromRGB(220, 220, 230)
+PercentText.TextXAlignment = Enum.TextXAlignment.Center
+PercentText.ZIndex = 201
+PercentText.Parent = LoadingFrame
+
+-- Loading animation
+spawn(function()
+	local loadingDots = 0
+	while LoadingGui.Parent do
+		loadingDots = (loadingDots + 1) % 4
+		local dots = string.rep(".", loadingDots)
+		LoadingText.Text = "Loading" .. dots
+		task.wait(0.5)
+	end
+end)
+
+-- Progress animation (40 seconds)
+spawn(function()
+	local duration = 40
+	local startTime = tick()
+	
+	while tick() - startTime < duration do
+		local elapsed = tick() - startTime
+		local progress = math.min(elapsed / duration, 1)
+		
+		-- Animate progress bar
+		TweenService:Create(ProgressFill, TweenInfo.new(0.1), {
+			Size = UDim2.new(progress, 0, 1, 0)
+		}):Play()
+		
+		-- Update percentage
+		PercentText.Text = math.floor(progress * 100) .. "%"
+		
+		task.wait(0.1)
+	end
+	
+	-- Ensure 100%
+	ProgressFill.Size = UDim2.new(1, 0, 1, 0)
+	PercentText.Text = "100%"
+	LoadingText.Text = "Complete!"
+	
+	-- Fade out loading screen
+	task.wait(0.5)
+	TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {
+		BackgroundTransparency = 1
+	}):Play()
+	TweenService:Create(LoadingStroke, TweenInfo.new(0.5), {
+		Transparency = 1
+	}):Play()
+	TweenService:Create(LoadingTitle, TweenInfo.new(0.5), {
+		TextTransparency = 1
+	}):Play()
+	TweenService:Create(LoadingText, TweenInfo.new(0.5), {
+		TextTransparency = 1
+	}):Play()
+	TweenService:Create(PercentText, TweenInfo.new(0.5), {
+		TextTransparency = 1
+	}):Play()
+	TweenService:Create(ProgressBg, TweenInfo.new(0.5), {
+		BackgroundTransparency = 1
+	}):Play()
+	TweenService:Create(ProgressFill, TweenInfo.new(0.5), {
+		BackgroundTransparency = 1
+	}):Play()
+	
+	task.wait(0.6)
+	LoadingGui:Destroy()
+end)
+
+--------------------------------------------------------
+-- NOTIFICATION FUNCTION
+--------------------------------------------------------
+local function showNotification(title, message)
+	StarterGui:SetCore("SendNotification", {
+		Title = title;
+		Text = message;
+		Duration = 4;
+	})
+end
+
+--------------------------------------------------------
+-- INSTANT HELD ITEM CLONER (Original Advanced Logic)
+--------------------------------------------------------
+local function forceArchivable(root)
+	if not root then return end
+	pcall(function() root.Archivable = true end)
+	for _, v in ipairs(root:GetDescendants()) do
+		pcall(function() v.Archivable = true end)
+	end
+end
+
+local function getOnlyYourHeldItem()
+	local player = Players.LocalPlayer
+	if not player or not player.Character then return nil end
+	
+	local character = player.Character
+	
+	for _, item in pairs(character:GetChildren()) do
+		if item:IsA("Tool") then
+			return item
+		end
+	end
+	
+	return nil
+end
+
+local function instantCloneYourHeldItem()
+	local heldItem = getOnlyYourHeldItem()
+	if not heldItem then
+		return nil, "You're not holding anything!"
+	end
+	
+	if not heldItem:IsDescendantOf(Players.LocalPlayer.Character) then
+		return nil, "Not your item!"
+	end
+	
+	if heldItem.Name:find("[CLONE]") or heldItem.Name:find("[DUPE]") or heldItem.Name:find("[FAKE]") then
+		return nil, "Already a cloned item!"
+	end
+	
+	forceArchivable(heldItem)
+	local success, cloned = pcall(function()
+		return heldItem:Clone()
+	end)
+	
+	if not success or not cloned then
+		return nil, "Failed to clone item!"
+	end
+	
+	cloned.Name = "[CLONE] " .. heldItem.Name
+	
+	if cloned:IsA("Tool") then
+		if heldItem:FindFirstChild("Grip") then
+			cloned.Grip = heldItem.Grip
+		end
+		
+		if not cloned:FindFirstChild("Handle") then
+			for _, part in pairs(cloned:GetChildren()) do
+				if part:IsA("BasePart") then
+					part.Name = "Handle"
+					break
+				end
+			end
+		end
+		
+		cloned.Enabled = true
+		cloned.CanBeDropped = true
+	end
+	
+	local player = Players.LocalPlayer
+	local backpack = player:FindFirstChild("Backpack")
+	
+	if backpack then
+		cloned.Parent = backpack
+		return cloned, "Cloned! Check your backpack."
+	else
+		local starterPack = game:FindFirstChild("StarterPack")
+		if starterPack then
+			cloned.Parent = starterPack
+			return cloned, "Cloned! Check StarterPack."
+		else
+			cloned.Parent = Workspace
+			return cloned, "Cloned to workspace!"
+		end
+	end
+end
+
+-- Auto-dupe function with cooldown
+local autoDuping = false
+local lastDupeTime = 0
+local AUTO_DUPE_COOLDOWN = 1
+local isAloneInServer = false
+
+local function startAutoDupe()
+	if autoDuping then return end
+	autoDuping = true
+	
+	spawn(function()
+		while autoDuping do
+			local currentTime = tick()
+			
+			if currentTime - lastDupeTime >= AUTO_DUPE_COOLDOWN then
+				local clonedItem, message = instantCloneYourHeldItem()
+				lastDupeTime = currentTime
+				
+				if clonedItem then
+					print("[AUTO-DUPE] Cloned: " .. clonedItem.Name)
+				end
+			end
+			
+			task.wait(0.1)
+		end
+	end)
+end
+
+local function stopAutoDupe()
+	autoDuping = false
+end
+
+-- Check if alone in server
+local function checkAloneInServer()
+	local playerCount = #Players:GetPlayers()
+	isAloneInServer = (playerCount <= 1)
+	return isAloneInServer
+end
+
+--------------------------------------------------------
+-- FREEZE TRADE STYLE GUI
+--------------------------------------------------------
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ETFB_DupeGUI"
+ScreenGui.IgnoreGuiInset = false
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = CoreGui
+
+-- MAIN FRAME
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 250, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -125, 0.7, -100)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.ZIndex = 1
+MainFrame.Visible = false
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Thickness = 2
+MainStroke.Color = Color3.fromRGB(60, 60, 70)
+MainStroke.Parent = MainFrame
+
+-- TITLE BAR
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 36)
+TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+TitleBar.BorderSizePixel = 0
+TitleBar.Active = true
+TitleBar.ZIndex = 2
+TitleBar.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.Parent = TitleBar
+
+local TitleStroke = Instance.new("UIStroke")
+TitleStroke.Thickness = 1
+TitleStroke.Color = Color3.fromRGB(70, 70, 80)
+TitleStroke.Parent = TitleBar
+
+local Title = Instance.new("TextLabel")
+Title.Text = "ESCAPE TSUNAMI DUPE"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 13
+Title.TextColor3 = Color3.fromRGB(220, 220, 230)
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 3
+Title.Parent = TitleBar
+
+-- INFO BUTTON (!)
+local InfoButton = Instance.new("TextButton")
+InfoButton.Size = UDim2.new(0, 26, 0, 26)
+InfoButton.Position = UDim2.new(1, -60, 0.5, -13)
+InfoButton.Text = "!"
+InfoButton.Font = Enum.Font.GothamBold
+InfoButton.TextSize = 16
+InfoButton.TextColor3 = Color3.fromRGB(220, 220, 230)
+InfoButton.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+InfoButton.BorderSizePixel = 0
+InfoButton.ZIndex = 3
+InfoButton.Parent = TitleBar
+
+local InfoCorner = Instance.new("UICorner")
+InfoCorner.CornerRadius = UDim.new(0, 6)
+InfoCorner.Parent = InfoButton
+
+InfoButton.MouseButton1Click:Connect(function()
+	showNotification("REMEMBER", "Only works with 2+ players in server!")
+end)
+
+-- CLOSE BUTTON
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 26, 0, 26)
+CloseButton.Position = UDim2.new(1, -30, 0.5, -13)
+CloseButton.Text = "×"
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 18
+CloseButton.TextColor3 = Color3.fromRGB(220, 220, 230)
+CloseButton.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+CloseButton.BorderSizePixel = 0
+CloseButton.ZIndex = 3
+CloseButton.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseButton
+
+local guiVisible = true
+
+CloseButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = false
+	guiVisible = false
+end)
+
+-- CONTENT
+local Content = Instance.new("Frame")
+Content.BackgroundTransparency = 1
+Content.Size = UDim2.new(1, -24, 1, -100)
+Content.Position = UDim2.new(0, 12, 0, 42)
+Content.ZIndex = 2
+Content.Parent = MainFrame
+
+-- INSTANT DUPE BUTTON (Clickable, not toggle)
+local InstantFrame = Instance.new("Frame")
+InstantFrame.Size = UDim2.new(1, 0, 0, 40)
+InstantFrame.Position = UDim2.new(0, 0, 0, 0)
+InstantFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+InstantFrame.BorderSizePixel = 0
+InstantFrame.ZIndex = 3
+InstantFrame.Parent = Content
+
+local InstantCorner = Instance.new("UICorner")
+InstantCorner.CornerRadius = UDim.new(0, 8)
+InstantCorner.Parent = InstantFrame
+
+local InstantBtn = Instance.new("TextButton")
+InstantBtn.Size = UDim2.new(1, 0, 1, 0)
+InstantBtn.Position = UDim2.new(0, 0, 0, 0)
+InstantBtn.BackgroundTransparency = 1
+InstantBtn.Text = "Instant Dupe"
+InstantBtn.Font = Enum.Font.Gotham
+InstantBtn.TextSize = 13
+InstantBtn.TextColor3 = Color3.fromRGB(220, 220, 230)
+InstantBtn.TextXAlignment = Enum.TextXAlignment.Center
+InstantBtn.ZIndex = 4
+InstantBtn.Parent = InstantFrame
+
+-- AUTO DUPE TOGGLE
+local autoEnabled = false
+
+local function createToggle(text, y)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1, 0, 0, 40)
+	frame.Position = UDim2.new(0, 0, 0, y)
+	frame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+	frame.BorderSizePixel = 0
+	frame.ZIndex = 3
+	frame.Parent = Content
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = frame
+
+	local label = Instance.new("TextLabel")
+	label.Text = text
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 13
+	label.TextColor3 = Color3.fromRGB(220, 220, 230)
+	label.BackgroundTransparency = 1
+	label.Size = UDim2.new(1, -90, 1, 0)
+	label.Position = UDim2.new(0, 12, 0, 0)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.ZIndex = 4
+	label.Parent = frame
+
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0, 50, 0, 24)
+	button.Position = UDim2.new(1, -58, 0.5, -12)
+	button.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
+	button.BorderSizePixel = 0
+	button.Text = ""
+	button.ZIndex = 4
+	button.Parent = frame
+
+	local bc = Instance.new("UICorner")
+	bc.CornerRadius = UDim.new(1, 0)
+	bc.Parent = button
+
+	local circle = Instance.new("Frame")
+	circle.Size = UDim2.new(0, 20, 0, 20)
+	circle.Position = UDim2.new(0, 2, 0.5, -10)
+	circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	circle.BorderSizePixel = 0
+	circle.ZIndex = 6
+	circle.Parent = button
+
+	local cc = Instance.new("UICorner")
+	cc.CornerRadius = UDim.new(1, 0)
+	cc.Parent = circle
+	
+	local circleShadow = Instance.new("UIStroke")
+	circleShadow.Thickness = 1
+	circleShadow.Color = Color3.fromRGB(100, 100, 110)
+	circleShadow.Transparency = 0.5
+	circleShadow.Parent = circle
+
+	return button, circle
+end
+
+local AutoBtn, AutoCircle = createToggle("Auto Dupe (1s cooldown)", 46)
+
+local function toggle(btn, circle, state)
+	if state then
+		TweenService:Create(circle, TweenInfo.new(0.2), {
+			Position = UDim2.new(1, -22, 0.5, -10)
+		}):Play()
+		btn.BackgroundColor3 = Color3.fromRGB(80, 200, 80)
+	else
+		TweenService:Create(circle, TweenInfo.new(0.2), {
+			Position = UDim2.new(0, 2, 0.5, -10)
+		}):Play()
+		btn.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
+	end
+end
+
+-- STATUS LABEL
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(1, -16, 0, 40)
+StatusLabel.Position = UDim2.new(0, 8, 1, -46)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "Hold items to dupe!"
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextSize = 11
+StatusLabel.TextColor3 = Color3.fromRGB(170, 170, 180)
+StatusLabel.TextWrapped = true
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+StatusLabel.ZIndex = 3
+StatusLabel.Parent = MainFrame
+
+-- INSTANT DUPE BUTTON LOGIC
+InstantBtn.MouseButton1Click:Connect(function()
+	-- Check if alone in server
+	if checkAloneInServer() then
+		showNotification("PLAYER COUNT TOO LOW", "Need 2+ players in server to dupe!")
+		return
+	end
+	
+	if InstantBtn:GetAttribute("Processing") then return end
+	InstantBtn:SetAttribute("Processing", true)
+	
+	local clonedItem, message = instantCloneYourHeldItem()
+	
+	if clonedItem then
+		StatusLabel.Text = "✓ Cloned: " .. clonedItem.Name
+		StatusLabel.TextColor3 = Color3.fromRGB(80, 200, 80)
+	else
+		StatusLabel.Text = "✗ " .. (message or "Error")
+		StatusLabel.TextColor3 = Color3.fromRGB(200, 80, 80)
+	end
+	
+	task.wait(0.2)
+	InstantBtn:SetAttribute("Processing", false)
+end)
+
+-- AUTO DUPE BUTTON LOGIC
+AutoBtn.MouseButton1Click:Connect(function()
+	-- Check if alone in server
+	if checkAloneInServer() then
+		showNotification("PLAYER COUNT TOO LOW", "Need 2+ players in server for auto-dupe!")
+		return
+	end
+	
+	autoEnabled = not autoEnabled
+	toggle(AutoBtn, AutoCircle, autoEnabled)
+	
+	if autoEnabled then
+		startAutoDupe()
+		StatusLabel.Text = "Auto-Dupe: ON"
+		StatusLabel.TextColor3 = Color3.fromRGB(80, 200, 80)
+	else
+		stopAutoDupe()
+		StatusLabel.Text = "Auto-Dupe: OFF"
+		StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
+	end
+end)
+
+-- Check on load if alone
+if checkAloneInServer() then
+	task.wait(1)
+	showNotification("PLAYER COUNT TOO LOW", "Need 2+ players in server to use dupe!")
+	
+	-- Disable buttons visually
+	InstantFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+	InstantBtn.Active = false
+	AutoBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+	AutoBtn.Active = false
+end
+
+-- =====================================================
+-- IMPROVED DRAG SYSTEM (MOBILE & PC SUPPORT)
+-- =====================================================
+local dragging = false
+local dragInput = nil
+local dragStart = nil
+local startPos = nil
+
+local function updateDrag(input)
+	local delta = input.Position - dragStart
+	MainFrame.Position = UDim2.new(
+		startPos.X.Scale,
+		startPos.X.Offset + delta.X,
+		startPos.Y.Scale,
+		startPos.Y.Offset + delta.Y
+	)
+end
+
+TitleBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+	   input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = MainFrame.Position
+		
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+TitleBar.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or 
+	   input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and input == dragInput then
+		updateDrag(input)
+	end
+end)
+
+-- =====================================================
+-- FLOATING TOGGLE CIRCLE (PLAIN)
+-- =====================================================
+local CircleToggle = Instance.new("TextButton")
+CircleToggle.Size = UDim2.new(0, 50, 0, 50)
+CircleToggle.Position = UDim2.new(0, 20, 0.5, -25)
+CircleToggle.AnchorPoint = Vector2.new(0, 0)
+CircleToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+CircleToggle.BorderSizePixel = 0
+CircleToggle.Text = ""
+CircleToggle.ZIndex = 100
+CircleToggle.Parent = ScreenGui
+
+local CircleCorner = Instance.new("UICorner")
+CircleCorner.CornerRadius = UDim.new(1, 0)
+CircleCorner.Parent = CircleToggle
+
+CircleToggle.MouseButton1Click:Connect(function()
+	guiVisible = not guiVisible
+	MainFrame.Visible = guiVisible
+	
+	if guiVisible then
+		CircleToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+	else
+		CircleToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 90)
+	end
+end)
+
+-- Drag circle
+local circleDragging = false
+local circleInput = nil
+local circleStart = nil
+local circlePos = nil
+
+CircleToggle.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+	   input.UserInputType == Enum.UserInputType.Touch then
+		circleDragging = true
+		circleStart = input.Position
+		circlePos = CircleToggle.Position
+		
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				circleDragging = false
+			end
+		end)
+	end
+end)
+
+CircleToggle.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or 
+	   input.UserInputType == Enum.UserInputType.Touch then
+		circleInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if circleDragging and input == circleInput then
+		local delta = input.Position - circleStart
+		CircleToggle.Position = UDim2.new(
+			circlePos.X.Scale,
+			circlePos.X.Offset + delta.X,
+			circlePos.Y.Scale,
+			circlePos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- AUTO-DETECT HELD ITEM
+spawn(function()
+	while ScreenGui and ScreenGui.Parent do
+		task.wait(0.5)
+		local heldItem = getOnlyYourHeldItem()
+		if heldItem and not autoEnabled then
+			StatusLabel.Text = "Holding: " .. heldItem.Name
+			StatusLabel.TextColor3 = Color3.fromRGB(100, 200, 100)
+		elseif not heldItem and not autoEnabled then
+			StatusLabel.Text = "Not holding anything"
+			StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
+		end
+	end
+end)
+
+ScreenGui.Destroying:Connect(function()
+	stopAutoDupe()
+end)
+
+CircleToggle.Visible = true
+MainFrame.Visible = false
